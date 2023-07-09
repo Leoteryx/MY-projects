@@ -214,6 +214,30 @@ data5 = pd.DataFrame(data_list)
 
 data5
 
+#import plotly.express as px
+
+## Read the geojson file for India
+#with open('india_states.geojson', 'r') as f:
+#    geojson = f.read()
+
+## Create a choropleth map
+#fig = px.choropleth(
+#    data_frame=data5,
+#    geojson=geojson,
+#    locations='States',
+#    featureidkey='properties.NAME_1',
+#    color='Transaction_Count',
+#    hover_name='States',
+#    title='Transaction Counts by State in India',
+#    labels={'Transaction_Count': 'Transaction Count'}
+#)
+
+## Customize the map layout
+#fig.update_geos(fitbounds='locations', visible=False)
+
+## Show the map
+#fig.show()
+
 import os
 import json
 import pandas as pd
@@ -290,11 +314,11 @@ d5.to_csv('top_tran.csv', index=False)
 d6.to_csv('top_user.csv', index=False)
 
 Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
-Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
-Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
-Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
-Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
-Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
+map_tran = pd.read_csv(r'/content/map_tran.csv')
+map_user = pd.read_csv(r'/content/map_user.csv')
+top_tran = pd.read_csv(r'/content/top_tran.csv')
+top_user = pd.read_csv(r'/content/top_user.csv')
+#Agg_trans = pd.read_csv(r'/content/agg_user.csv')
 
 !pip install mysql-connector-python
 !pip install streamlit plotly mysql-connector-python
@@ -317,19 +341,182 @@ import mysql.connector
 
 import sqlite3
 
-sqlite_conn = sqlite3.connect('phonepe.db')
+#sqlite_conn = sqlite3.connect('phonepe.db')
+#sqlite_cursor = sqlite_conn.cursor()
+
+import sqlite3
+import pandas as pd
+conn = sqlite3.connect('example.db')
+
+# Create the playlist table in SQLite
+sqlite_cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Agg_trans (
+        States VARCHAR(255),
+        Transaction_Year DATETIME,
+        Transaction_Type VARCHAR(255),
+        Transaction_Count INTEGER,
+        Transaction_Amount INTEGER
+    )
+''')
+
+sqlite_cursor.execute('''
+   CREATE TABLE IF NOT EXISTS map_tran (
+        States VARCHAR(255),
+        Transaction_Year DATETIME,
+        Transaction_Type VARCHAR(255),
+        Transaction_Count INTEGER,
+        Transaction_Amount INTEGER
+    )
+''')
+sqlite_cursor.execute('''
+    CREATE TABLE IF NOT EXISTS map_user(
+        States VARCHAR(255),
+        Transaction_Year DATETIME,
+        Quarters INTEGER,
+        District VARCHAR(255),
+        Transaction_Type VARCHAR(255),
+        Transaction_Count INTEGER
+    )
+''')
+
+sqlite_cursor.execute('''
+    CREATE TABLE IF NOT EXISTS top_tran (
+        States VARCHAR(255),
+        Transaction_Year DATETIME,
+        Quarter INTEGER,
+        District VARCHAR(255),
+        RegisteredUsers INTEGER
+    )
+''')
+# Commit changes and close connections
+#sqlite_conn.commit()
+#sqlite_conn.close()
+
+import sqlite3
+
+# Connect to the SQLite database
+sqlite_conn = sqlite3.connect('example.db')
 sqlite_cursor = sqlite_conn.cursor()
 
-create_table_query = '''
-CREATE TABLE aggTransa (
-    id INTEGER PRIMARY KEY,
-    transaction_date TEXT,
-    amount REAL,
-    description TEXT
-)
-'''
+# Sample data for Agg_trans table
+agg_trans_data = [
+    ('Andhra Pradesh', '2021-01-01', 'UPI', 23320, 210855020),
+    ('Andhra Pradesh', '2021-01-01', 'Wallet', 38138, 6466355),
+    ('Andhra Pradesh', '2021-01-01', 'Cards', 4293, 34528813),
+    ('Andhra Pradesh', '2021-01-01', 'Bank Account', 4411, 33470393),
+    # More rows of data...
+]
 
-sqlite_cursor.execute(create_table_query)
+# Insert data into Agg_trans table
+sqlite_cursor.executemany("INSERT INTO Agg_trans VALUES (?, ?, ?, ?, ?)", agg_trans_data)
+sqlite_conn.commit()
+
+# Sample data for map_tran table
+map_tran_data = [
+    ('Andhra Pradesh', '2021-01-01', 'UPI', 23320, 210855020),
+    ('Andhra Pradesh', '2021-01-01', 'Wallet', 38138, 6466355),
+    ('Andhra Pradesh', '2021-01-01', 'Cards', 4293, 34528813),
+    ('Andhra Pradesh', '2021-01-01', 'Bank Account', 4411, 33470393),
+    # More rows of data...
+]
+
+# Insert data into map_tran table
+sqlite_cursor.executemany("INSERT INTO map_tran VALUES (?, ?, ?, ?, ?)", map_tran_data)
+sqlite_conn.commit()
+
+# Sample data for map_user table
+map_user_data = [
+    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'UPI', 2414),
+    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'Wallet', 4181),
+    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'Cards', 386),
+    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'Bank Account', 431),
+    # More rows of data...
+]
+
+# Insert data into map_user table
+sqlite_cursor.executemany("INSERT INTO map_user VALUES (?, ?, ?, ?, ?, ?)", map_user_data)
+sqlite_conn.commit()
+
+# Sample data for top_tran table
+top_tran_data = [
+    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 17470),
+    ('Andhra Pradesh', '2021-01-01', 1, 'Chittoor', 19133),
+    ('Andhra Pradesh', '2021-01-01', 1, 'East Godavari', 33291),
+    ('Andhra Pradesh', '2021-01-01', 1, 'Guntur', 26582),
+    # More rows of data...
+]
+
+# Insert data into top_tran table
+sqlite_cursor.executemany("INSERT INTO top_tran VALUES (?, ?, ?, ?, ?)", top_tran_data)
+sqlite_conn.commit()
+
+# Print Agg_trans table
+sqlite_cursor.execute("SELECT * FROM Agg_trans")
+agg_trans_rows = sqlite_cursor.fetchall()
+print("Agg_trans table:")
+for row in agg_trans_rows:
+    print(row)
+
+# Print map_tran table
+sqlite_cursor.execute("SELECT * FROM map_tran")
+map_tran_rows = sqlite_cursor.fetchall()
+print("map_tran table:")
+for row in map_tran_rows:
+    print(row)
+
+# Print map_user table
+sqlite_cursor.execute("SELECT * FROM map_user")
+map_user_rows = sqlite_cursor.fetchall()
+print("map_user table:")
+for row in map_user_rows:
+    print(row)
+
+# Print top_tran table
+sqlite_cursor.execute("SELECT * FROM top_tran")
+top_tran_rows = sqlite_cursor.fetchall()
+print("top_tran table:")
+for row in top_tran_rows:
+    print(row)
+
+# Close the database connection
+#sqlite_conn.close()
+
+#sqlite_cursor = conn.cursor()
+# Define table names
+#table1_name = 'table1'
+#table2_name = 'table2'
+#table3_name = 'table3'
+#table4_name = 'table4'
+
+# Store data in SQLite tables
+#data1.to_sql(table1_name, conn, if_exists='replace', index=False)
+#data2.to_sql(table2_name, conn, if_exists='replace', index=False)
+#data3.to_sql(table3_name, conn, if_exists='replace', index=False)
+#data4.to_sql(table4_name, conn, if_exists='replace', index=False)
+
+#create_table_query1 = '''
+#CREATE TABLE IF NOT EXISTS aggTransa (
+#    id INTEGER PRIMARY KEY,
+#    transaction_date DATETIME,
+#    Transaction_Amount INTEGER,
+#    description TEXT
+#)
+#'''
+
+#create_table_query2 = '''
+#CREATE TABLE IF NOT EXISTS top_tran (
+#    States VARCHAR(255),
+#    Transaction_Year INTEGER,
+#    Transaction_Count REAL
+#)
+#'''
+
+# Execute the CREATE TABLE statements
+#sqlite_cursor.execute(create_table_query1)
+#sqlite_cursor.execute(create_table_query2)
+
+#conn.commit()
+#conn.close()
 
 # fetch all rows
 rows = sqlite_cursor.fetchall()
@@ -337,9 +524,6 @@ rows = sqlite_cursor.fetchall()
 # print the rows
 for row in rows:
   print(row)
-
-#sqlite_cursor.close()
-#sqlite_conn.close()
 
 !pip install streamlit
 !pip install db-sqlite3
@@ -356,104 +540,153 @@ from PIL import Image
 # import pandas as pd
 # import plotly.express as px
 # from PIL import Image
+# import sqlite3
+# import io
+# from google.colab import files
+# import matplotlib.pyplot as plt
 # 
-# SELECT = st.selectbox(
-#     "Select an option",
-#     ["About", "Home", "Basic insights", "Contact"],
-#     index=2,
-#     format_func=lambda x: x.upper(),
-# )
-# 
-# if SELECT == "Basic insights":
-#     st.title("BASIC INSIGHTS")
-#     st.write("----")
-#     st.subheader("Let's know some basic insights about the data")
-#     options = [
-#         "-- Select --",
-#         "Top 10 states based on year and amount of transaction",
-#         "List 10 states based on type and amount of transaction",
-#         "Top 5 Transaction_Type based on Transaction_Amount",
-#         "Top 10 Registered-users based on States and District",
-#         "Top 10 Districts based on states and Count of transaction",
-#         "List 10 Districts based on states and amount of transaction",
-#         "List 10 Transaction_Count based on Districts and states",
-#         "Top 10 RegisteredUsers based on states and District",
-#     ]
-#     select = st.selectbox("Select an option", options)
-# 
-#     if select == "Top 10 states based on year and amount of transaction":
-#         sqlite_cursor.execute(
-#             "SELECT DISTINCT States, Transaction_Year, SUM(Transaction_Amount) AS Total_Transaction_Amount FROM top_tran GROUP BY States, Transaction_Year ORDER BY Total_Transaction_Amount DESC LIMIT 10"
-#         )
-#         df = pd.DataFrame(
-#             sqlite_cursor.fetchall(),
-#             columns=["States", "Transaction_Year", "Transaction_Amount"],
-#         )
-#         st.write(df)
-#         st.title("Top 10 states and amount of transaction")
-#         st.bar_chart(data=df, x="Transaction_Amount", y="States")
-# 
-#     elif select == "List 10 states based on type and amount of transaction":
-#         sqlite_cursor.execute(
-#             "SELECT DISTINCT States, SUM(Transaction_Count) as Total FROM top_tran GROUP BY States ORDER BY Total ASC LIMIT 10"
-#         )
-#         df = pd.DataFrame(
-#             sqlite_cursor.fetchall(), columns=["States", "Total_Transaction"]
-#         )
-#         st.write(df)
-#         st.title("List 10 states based on type and amount of transaction")
-#         st.bar_chart(data=df, x="Total_Transaction", y="States")
-# 
-#     elif select == "Top 5 Transaction_Type based on Transaction_Amount":
-#         sqlite_cursor.execute(
-#             "SELECT DISTINCT Transaction_Type, SUM(Transaction_Amount) AS Amount FROM agg_user GROUP BY Transaction_Type ORDER BY Amount DESC LIMIT 5"
-#         )
-#         df = pd.DataFrame(
-#             sqlite_cursor.fetchall(), columns=["Transaction_Type", "Transaction_Amount"]
-#         )
-#         st.write(df)
-#         st.title("Top 5 Transaction_Type based on Transaction_Amount")
-#         st.bar_chart(data=df, x="Transaction_Type", y="Amount")
-# 
-#     elif select == "Top 10 Registered-users based on States and District":
-#         sqlite_cursor.execute(
-#             "SELECT DISTINCT State, District, SUM(RegisteredUsers) AS Users FROM top_user GROUP BY State, District ORDER BY Users DESC LIMIT 10"
-#         )
-#         df = pd.DataFrame(
-#             sqlite_cursor.fetchall(), columns=["State", "District", "RegisteredUsers"]
-#         )
-#         st.write(df)
-#         st.title("Top 10 Registered-users based on States and District")
-#         st.bar_chart
-# 
-# 
+# sqlite_conn = sqlite3.connect('example.db')
 # sqlite_cursor = sqlite_conn.cursor()
 # 
-# # execute a SELECT statement
-# sqlite_cursor.execute("SELECT * FROM aggTransa")
 # 
-# # fetch all rows
-# rows = sqlite_cursor.fetchall()
+# def main():
+#     SELECT = st.sidebar.selectbox(
+#         "Select an option",
+#         ["About", "Home", "Basic insights", "Contact"],
+#         index=2,
+#         format_func=lambda x: x.upper()
+#     )
 # 
-# if SELECT == "Home":
-#     col1,col2, = st.columns(2)
-#     col1.image(Image.open("C:/Users/omkar/Downloads/phonepe photo/phonepe.png"),width = 500)
-#     with col1:
-#         st.subheader("PhonePe  is an Indian digital payments and financial technology company headquartered in Bengaluru, Karnataka, India. PhonePe was founded in December 2015, by Sameer Nigam, Rahul Chari and Burzin Engineer. The PhonePe app, based on the Unified Payments Interface (UPI), went live in August 2016. It is owned by Flipkart, a subsidiary of Walmart.")
+#     if SELECT == "Basic insights":
+#         st.title("BASIC INSIGHTS")
+#         st.write("----")
+#         st.subheader("Let's know some basic insights about the data")
+#         options = [
+#             "-- Select --",
+#             "Top 10 states based on year and amount of transaction",
+#             "List 10 states based on type and amount of transaction",
+#             "Top 5 Transaction_Type based on Transaction_Amount",
+#             "Top 10 Registered-users based on States and District"
+#         ]
+#         select = st.selectbox("Select an option", options)
+# 
+#         if select == "Top 10 states based on year and amount of transaction":
+#             sqlite_cursor.execute(
+#                 "SELECT DISTINCT States, Transaction_Year, SUM(Transaction_Amount) AS Total_Transaction_Amount FROM top_tran GROUP BY States, Transaction_Year ORDER BY Total_Transaction_Amount DESC LIMIT 10"
+#             )
+#             df = pd.DataFrame(
+#                 sqlite_cursor.fetchall(),
+#                 columns=["States", "Transaction_Year", "Total_Transaction_Amount"]
+#             )
+#             st.table(df)
+#             st.title("Top 10 states and amount of transaction")
+#             st.bar_chart(data=df, x="Total_Transaction_Amount", y="States")
+# 
+#         elif select == "List 10 states based on type and amount of transaction":
+#             sqlite_cursor.execute(
+#                 "SELECT DISTINCT States, SUM(Transaction_Count) AS Total_Transaction_Count FROM map_tran GROUP BY States ORDER BY Total_Transaction_Count ASC LIMIT 10"
+#             )
+#             df = pd.DataFrame(
+#                 sqlite_cursor.fetchall(),
+#                 columns=["States", "Total_Transaction_Count"]
+#             )
+#             st.table(df)
+#             st.title("List 10 states based on type and amount of transaction")
+#             st.bar_chart(data=df, x="Total_Transaction_Count", y="States")
+# 
+#         elif select == "Top 5 Transaction_Type based on Transaction_Amount":
+#             sqlite_cursor.execute(
+#                 "SELECT DISTINCT Transaction_Type, SUM(Transaction_Amount) AS Total_Transaction_Amount FROM Agg_trans GROUP BY Transaction_Type ORDER BY Total_Transaction_Amount DESC LIMIT 5"
+#             )
+#             df = pd.DataFrame(
+#                 sqlite_cursor.fetchall(),
+#                 columns=["Transaction_Type", "Total_Transaction_Amount"]
+#             )
+#             st.table(df)
+#             st.title("Top 5 Transaction_Type based on Transaction_Amount")
+#             st.bar_chart(data=df, x="Transaction_Type", y="Total_Transaction_Amount")
+# 
+#         elif select == "Top 10 Registered-users based on States and District":
+#             sqlite_cursor.execute(
+#                 "SELECT DISTINCT States, District, SUM(RegisteredUsers) AS Total_Registered_Users FROM top_tran GROUP BY States, District ORDER BY Total_Registered_Users DESC LIMIT 10"
+#             )
+#             df = pd.DataFrame(
+#                 sqlite_cursor.fetchall(),
+#                 columns=["States", "District", "Total_Registered_Users"]
+#             )
+#             st.table(df)
+#             st.title("Top 10 Registered-users based on States and District")
+#             st.bar_chart(data=df, x="Total_Registered_Users", y="States")
+# 
+# 
+#     elif SELECT == "Home":
+#         st.title("HOME")
+# 
+#         image_path = "/content/drive/MyDrive/392480-phone-pe.jpeg"
+#         image = Image.open(image_path)
+#         st.image(image, use_column_width=True)
+# 
+#         st.subheader("PhonePe is an Indian digital payments and financial technology company headquartered in Bengaluru, Karnataka, India. PhonePe was founded in December 2015, by Sameer Nigam, Rahul Chari and Burzin Engineer. The PhonePe app, based on the Unified Payments Interface (UPI), went live in August 2016. It is owned by Flipkart, a subsidiary of Walmart.")
 #         st.download_button("DOWNLOAD THE APP NOW", "https://www.phonepe.com/app-download/")
-#     with col2:
-#         st.video("C:/Users/omkar/Downloads/phonepe photo/upi.mp4")
 # 
+#         st.video("https://youtu.be/WUkw3LVjhQk")  #https://youtu.be/WUkw3LVjhQk
 # 
-#     df = pd.DataFrame(rows, columns=['States', 'Transaction_Year', 'Quarters', 'Transaction_Type', 'Transaction_Count','Transaction_Amount'])
-#     fig = px.choropleth(df, locations="States", scope="asia", color="States", hover_name="States",
-#         title="Live Geo Visualization of India")
-#     st.plotly_chart(fig)
+#         # Your code for other content in the home section
 # 
+#         df = pd.DataFrame(columns=['States', 'Transaction_Year', 'Quarters', 'Transaction_Type', 'Transaction_Count', 'Transaction_Amount'])
+#         fig = px.choropleth(df, locations="States", scope="asia", color="States", hover_name="States", title="Live Geo Visualization of India")
+#         st.plotly_chart(fig)
+# 
+#     elif SELECT == "About":
+#         st.title("ABOUT")
+#         st.video("https://youtu.be/WUkw3LVjhQk")
+# 
+#         image_path = "/content/drive/MyDrive/392480-phone-pe.jpeg"
+#         image = Image.open(image_path)
+#         st.image(image, use_column_width=True)
+# 
+#         st.write("---")
+#         st.subheader("The Indian digital payments story has truly captured the world's imagination. From the largest towns to the remotest villages, there is a payments revolution being driven by the penetration of mobile phones, mobile internet and states-of-the-art payments infrastructure built as Public Goods championed by the central bank and the government. Founded in December 2015, PhonePe has been a strong beneficiary of the API-driven digitization of payments in India. When we started, we were constantly looking for granular and definitive data sources on digital payments in India. PhonePe Pulse is our way of giving back to the digital payments ecosystem.")
+#         st.write("---")
+#         st.title("THE BEAT OF PHONEPE")
+#         st.write("---")
+#         st.subheader("PhonePe became a leading digital payments company")
+#         st.image(image, width=400)
+# 
+#         with open("/content/annual report.pdf", "rb") as f:
+#             data = f.read()
+#         st.download_button("DOWNLOAD REPORT", data, file_name="annual report.pdf")
+# 
+#         st.image(Image.open("/content/report.jpeg"), width=800)
+# 
+#     elif SELECT == "Contact":
+#         name = "surya teja"
+#         mail = (f'{"Mail :"}  {"12344@gmail.com"}')
+#         description = "An Aspiring DATA-SCIENTIST..!"
+#         social_media = {
+#             "GITHUB": "https://github.com/iooo",
+#             "LINKEDIN": "https://www.linkedin.com/in/surya-1234/"}
+# 
+#         col1, col2 = st.columns(2)
+# 
+#         with col1:
+#             st.title('Phonepe Pulse data visualisation')
+#             st.write("The goal of this project is to extract data from the Phonepe pulse Github repository, transform and clean the data, insert it into a MySQL database, and create a live geo visualization dashboard using Streamlit and Plotly in Python. The dashboard will display the data in an interactive and visually appealing manner, with at")
+#             st.write("---")
+#             st.subheader(mail)
+#         st.write("#")
+#         cols = st.columns(len(social_media))
+#         for index, (platform, link) in enumerate(social_media.items()):
+#             cols[index].write(f"[{platform}]({link})")
 # 
 # # Run the Streamlit app
 # if __name__ == '__main__':
+#     st.title("PhonePe Dashboard")
+#     st.sidebar.title("Navigation")
 #     main()
+
+from google.colab import drive
+drive.mount('/content/drive')
 
 !ls
 
