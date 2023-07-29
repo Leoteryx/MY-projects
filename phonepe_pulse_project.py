@@ -516,7 +516,7 @@ from PIL import Image
 # 
 #         if select == "Top 10 states based on year and amount of transaction":
 #             sqlite_cursor.execute(
-#                 "SELECT DISTINCT States, Transaction_Year, SUM(Transaction_Amount) AS Total_Transaction_Amount FROM top_tran GROUP BY States, Transaction_Year ORDER BY Total_Transaction_Amount DESC LIMIT 10"
+#                 "SELECT DISTINCT States, Transaction_Year, SUM(Transaction_Amount) AS Total_Transaction_Amount FROM Agg_trans GROUP BY States, Transaction_Year ORDER BY Total_Transaction_Amount DESC LIMIT 10"
 #             )
 #             df = pd.DataFrame(
 #                 sqlite_cursor.fetchall(),
@@ -528,7 +528,7 @@ from PIL import Image
 # 
 #         elif select == "List 10 states based on type and amount of transaction":
 #             sqlite_cursor.execute(
-#                 "SELECT DISTINCT States, SUM(Transaction_Count) AS Total_Transaction_Count FROM map_tran GROUP BY States ORDER BY Total_Transaction_Count ASC LIMIT 10"
+#                 "SELECT DISTINCT States, SUM(Transaction_Count) AS Total_Transaction_Count FROM Agg_trans GROUP BY States ORDER BY Total_Transaction_Count ASC LIMIT 10"
 #             )
 #             df = pd.DataFrame(
 #                 sqlite_cursor.fetchall(),
@@ -552,7 +552,7 @@ from PIL import Image
 # 
 #         elif select == "Top 10 Registered-users based on States and District":
 #             sqlite_cursor.execute(
-#                 "SELECT DISTINCT States, District, SUM(RegisteredUsers) AS Total_Registered_Users FROM top_tran GROUP BY States, District ORDER BY Total_Registered_Users DESC LIMIT 10"
+#                 "SELECT DISTINCT States, District, SUM(RegisteredUsers) AS Total_Registered_Users FROM Agg_trans GROUP BY States, District ORDER BY Total_Registered_Users DESC LIMIT 10"
 #             )
 #             df = pd.DataFrame(
 #                 sqlite_cursor.fetchall(),
