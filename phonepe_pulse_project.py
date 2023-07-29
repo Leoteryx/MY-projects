@@ -306,18 +306,18 @@ null_counts = d6.isnull().sum()
 print(null_counts)
 
 #converting all dataframes in to csv
-d1.to_csv('agg_trans.csv', index=False)
+d1.to_csv('map_tran.csv', index=False)
 #df2.to_csv('agg_user.csv', index=False)
-d3.to_csv('map_tran.csv', index=False)
+d3.to_csv('agg_trans.csv', index=False)
 d4.to_csv('map_user.csv', index=False)
 d5.to_csv('top_tran.csv', index=False)
 d6.to_csv('top_user.csv', index=False)
 
 Agg_trans = pd.read_csv(r'/content/agg_trans.csv')
-map_tran = pd.read_csv(r'/content/map_tran.csv')
-map_user = pd.read_csv(r'/content/map_user.csv')
-top_tran = pd.read_csv(r'/content/top_tran.csv')
-top_user = pd.read_csv(r'/content/top_user.csv')
+Agg_trans = pd.read_csv(r'/content/map_user.csv')
+Agg_trans = pd.read_csv(r'/content/top_tran.csv')
+Agg_trans = pd.read_csv(r'/content/top_user.csv')
+Agg_trans = pd.read_csv(r'/content/map_tran.csv')
 #Agg_trans = pd.read_csv(r'/content/agg_user.csv')
 
 !pip install mysql-connector-python
@@ -341,35 +341,33 @@ import mysql.connector
 
 import sqlite3
 
-#sqlite_conn = sqlite3.connect('phonepe.db')
-#sqlite_cursor = sqlite_conn.cursor()
-
 import sqlite3
 import pandas as pd
-conn = sqlite3.connect('example.db')
+sqlite_conn = sqlite3.connect('phonepedata.db')
+sqlite_cursor = sqlite_conn.cursor()
 
 # Create the playlist table in SQLite
 sqlite_cursor.execute('''
     CREATE TABLE IF NOT EXISTS Agg_trans (
         States VARCHAR(255),
         Transaction_Year DATETIME,
+        Quarters INTEGER,
+        District VARCHAR(255),
         Transaction_Type VARCHAR(255),
-        Transaction_Count INTEGER,
-        Transaction_Amount INTEGER
+        Transaction_Count INTEGER
     )
 ''')
-
 sqlite_cursor.execute('''
-   CREATE TABLE IF NOT EXISTS map_tran (
+   CREATE TABLE IF NOT EXISTS map_user (
         States VARCHAR(255),
+        Quarters INTEGER,
         Transaction_Year DATETIME,
-        Transaction_Type VARCHAR(255),
-        Transaction_Count INTEGER,
-        Transaction_Amount INTEGER
+        District VARCHAR(255),
+        RegisteredUsers INTEGER
     )
 ''')
 sqlite_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS map_user(
+    CREATE TABLE IF NOT EXISTS map_tran(
         States VARCHAR(255),
         Transaction_Year DATETIME,
         Quarters INTEGER,
@@ -381,6 +379,17 @@ sqlite_cursor.execute('''
 
 sqlite_cursor.execute('''
     CREATE TABLE IF NOT EXISTS top_tran (
+        Transaction_Year DATETIME,
+        Quarter INTEGER,
+        District VARCHAR(255),
+        Transaction_Type VARCHAR(255),
+        Transaction_Count INTEGER,
+        Transaction_Amount INTEGER
+    )
+ ''')
+
+sqlite_cursor.execute('''
+    CREATE TABLE IF NOT EXISTS top_user (
         States VARCHAR(255),
         Transaction_Year DATETIME,
         Quarter INTEGER,
@@ -388,142 +397,45 @@ sqlite_cursor.execute('''
         RegisteredUsers INTEGER
     )
 ''')
+
 # Commit changes and close connections
-#sqlite_conn.commit()
-#sqlite_conn.close()
+sqlite_conn.commit()
+sqlite_conn.close()
+
+import sqlite3
+import pandas as pd
+
+sqlite_conn = sqlite3.connect('phonepedata.db')
+
+Agg_trans.to_sql('Agg_trans', sqlite_conn, if_exists='append', index=False)
+#map_user.to_sql('map_user', sqlite_conn, if_exists='append', index=False)
+#map_tran.to_sql('map_tran', sqlite_conn, if_exists='append', index=False)
+#top_tran.to_sql('top_tran', sqlite_conn, if_exists='append', index=False)
+#Agg_trans.to_sql('top_user', sqlite_conn, if_exists='append', index=False)
+
+sqlite_conn.commit()
+sqlite_conn.close()
 
 import sqlite3
 
 # Connect to the SQLite database
-sqlite_conn = sqlite3.connect('example.db')
+sqlite_conn = sqlite3.connect('phonepedata.db')
 sqlite_cursor = sqlite_conn.cursor()
 
-# Sample data for Agg_trans table
-agg_trans_data = [
-    ('Andhra Pradesh', '2021-01-01', 'UPI', 23320, 210855020),
-    ('Andhra Pradesh', '2021-01-01', 'Wallet', 38138, 6466355),
-    ('Andhra Pradesh', '2021-01-01', 'Cards', 4293, 34528813),
-    ('Andhra Pradesh', '2021-01-01', 'Bank Account', 4411, 33470393),
-    # More rows of data...
-]
+# Execute a SELECT query to retrieve all data from the Agg_trans table
+sqlite_cursor.execute('SELECT * FROM Agg_trans')
+sqlite_cursor.execute('SELECT * FROM map_user')
+sqlite_cursor.execute('SELECT * FROM map_tran')
+sqlite_cursor.execute('SELECT * FROM top_tran')
+sqlite_cursor.execute('SELECT * FROM top_user')
 
-# Insert data into Agg_trans table
-sqlite_cursor.executemany("INSERT INTO Agg_trans VALUES (?, ?, ?, ?, ?)", agg_trans_data)
-sqlite_conn.commit()
-
-# Sample data for map_tran table
-map_tran_data = [
-    ('Andhra Pradesh', '2021-01-01', 'UPI', 23320, 210855020),
-    ('Andhra Pradesh', '2021-01-01', 'Wallet', 38138, 6466355),
-    ('Andhra Pradesh', '2021-01-01', 'Cards', 4293, 34528813),
-    ('Andhra Pradesh', '2021-01-01', 'Bank Account', 4411, 33470393),
-    # More rows of data...
-]
-
-# Insert data into map_tran table
-sqlite_cursor.executemany("INSERT INTO map_tran VALUES (?, ?, ?, ?, ?)", map_tran_data)
-sqlite_conn.commit()
-
-# Sample data for map_user table
-map_user_data = [
-    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'UPI', 2414),
-    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'Wallet', 4181),
-    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'Cards', 386),
-    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 'Bank Account', 431),
-    # More rows of data...
-]
-
-# Insert data into map_user table
-sqlite_cursor.executemany("INSERT INTO map_user VALUES (?, ?, ?, ?, ?, ?)", map_user_data)
-sqlite_conn.commit()
-
-# Sample data for top_tran table
-top_tran_data = [
-    ('Andhra Pradesh', '2021-01-01', 1, 'Anantapur', 17470),
-    ('Andhra Pradesh', '2021-01-01', 1, 'Chittoor', 19133),
-    ('Andhra Pradesh', '2021-01-01', 1, 'East Godavari', 33291),
-    ('Andhra Pradesh', '2021-01-01', 1, 'Guntur', 26582),
-    # More rows of data...
-]
-
-# Insert data into top_tran table
-sqlite_cursor.executemany("INSERT INTO top_tran VALUES (?, ?, ?, ?, ?)", top_tran_data)
-sqlite_conn.commit()
-
-# Print Agg_trans table
-sqlite_cursor.execute("SELECT * FROM Agg_trans")
-agg_trans_rows = sqlite_cursor.fetchall()
-print("Agg_trans table:")
-for row in agg_trans_rows:
+# Fetch all the rows and print the data
+all_rows = sqlite_cursor.fetchall()
+for row in all_rows:
     print(row)
 
-# Print map_tran table
-sqlite_cursor.execute("SELECT * FROM map_tran")
-map_tran_rows = sqlite_cursor.fetchall()
-print("map_tran table:")
-for row in map_tran_rows:
-    print(row)
-
-# Print map_user table
-sqlite_cursor.execute("SELECT * FROM map_user")
-map_user_rows = sqlite_cursor.fetchall()
-print("map_user table:")
-for row in map_user_rows:
-    print(row)
-
-# Print top_tran table
-sqlite_cursor.execute("SELECT * FROM top_tran")
-top_tran_rows = sqlite_cursor.fetchall()
-print("top_tran table:")
-for row in top_tran_rows:
-    print(row)
-
-# Close the database connection
-#sqlite_conn.close()
-
-#sqlite_cursor = conn.cursor()
-# Define table names
-#table1_name = 'table1'
-#table2_name = 'table2'
-#table3_name = 'table3'
-#table4_name = 'table4'
-
-# Store data in SQLite tables
-#data1.to_sql(table1_name, conn, if_exists='replace', index=False)
-#data2.to_sql(table2_name, conn, if_exists='replace', index=False)
-#data3.to_sql(table3_name, conn, if_exists='replace', index=False)
-#data4.to_sql(table4_name, conn, if_exists='replace', index=False)
-
-#create_table_query1 = '''
-#CREATE TABLE IF NOT EXISTS aggTransa (
-#    id INTEGER PRIMARY KEY,
-#    transaction_date DATETIME,
-#    Transaction_Amount INTEGER,
-#    description TEXT
-#)
-#'''
-
-#create_table_query2 = '''
-#CREATE TABLE IF NOT EXISTS top_tran (
-#    States VARCHAR(255),
-#    Transaction_Year INTEGER,
-#    Transaction_Count REAL
-#)
-#'''
-
-# Execute the CREATE TABLE statements
-#sqlite_cursor.execute(create_table_query1)
-#sqlite_cursor.execute(create_table_query2)
-
-#conn.commit()
-#conn.close()
-
-# fetch all rows
-rows = sqlite_cursor.fetchall()
-
-# print the rows
-for row in rows:
-  print(row)
+# Close the connection
+sqlite_conn.close()
 
 !pip install streamlit
 !pip install db-sqlite3
@@ -545,9 +457,41 @@ from PIL import Image
 # from google.colab import files
 # import matplotlib.pyplot as plt
 # 
-# sqlite_conn = sqlite3.connect('example.db')
+# sqlite_conn = sqlite3.connect('phonepedata.db')
 # sqlite_cursor = sqlite_conn.cursor()
 # 
+# # Function to plot the data on the India map
+# def plot_geo_map():
+#     data_path = "/content/agg_trans.csv"
+#     Agg_trans = pd.read_csv(data_path)
+# 
+#     indian_states_path = "/content/drive/MyDrive/Longitude_Latitude_State_Table.csv"
+#     Indian_States = pd.read_csv(indian_states_path)
+#     Indian_States.rename(columns={"code": "States"}, inplace=True)
+#     if "States" in Agg_trans.columns and "States" in Indian_States.columns:
+#         # Merge Agg_trans with Indian_States based on the "States" column
+#         merged_data = pd.merge(Agg_trans, Indian_States, on="States")
+# 
+# 
+#     fig = px.choropleth(
+#         merged_data,
+#         geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+#         featureidkey='properties.ST_NM',
+#         locations='States',
+#         color='Transaction_Count',  # Replace with the column containing the data you want to plot
+#         hover_name='States',  # Update hover_name to match the column name in the DataFrame
+#         hover_data=['Transaction_Count'],  # Add additional columns for more information on hover
+#         scope="asia"
+#     )
+# 
+#     fig.update_geos(fitbounds="locations", visible=False)
+#     fig.update_layout(
+#         title_text="Geo India Map",
+#         title_x=0.5,
+#         margin={"r": 0, "t": 40, "l": 0, "b": 0}
+#     )
+# 
+#     return fig
 # 
 # def main():
 #     SELECT = st.sidebar.selectbox(
@@ -618,9 +562,13 @@ from PIL import Image
 #             st.title("Top 10 Registered-users based on States and District")
 #             st.bar_chart(data=df, x="Total_Registered_Users", y="States")
 # 
-# 
 #     elif SELECT == "Home":
 #         st.title("HOME")
+#         st.plotly_chart(plot_geo_map())
+# 
+# 
+#         # fetch all rows
+#         rows = sqlite_cursor.fetchall()
 # 
 #         image_path = "/content/drive/MyDrive/392480-phone-pe.jpeg"
 #         image = Image.open(image_path)
@@ -631,11 +579,6 @@ from PIL import Image
 # 
 #         st.video("https://youtu.be/WUkw3LVjhQk")  #https://youtu.be/WUkw3LVjhQk
 # 
-#         # Your code for other content in the home section
-# 
-#         df = pd.DataFrame(columns=['States', 'Transaction_Year', 'Quarters', 'Transaction_Type', 'Transaction_Count', 'Transaction_Amount'])
-#         fig = px.choropleth(df, locations="States", scope="asia", color="States", hover_name="States", title="Live Geo Visualization of India")
-#         st.plotly_chart(fig)
 # 
 #     elif SELECT == "About":
 #         st.title("ABOUT")
@@ -653,11 +596,10 @@ from PIL import Image
 #         st.subheader("PhonePe became a leading digital payments company")
 #         st.image(image, width=400)
 # 
-#         with open("/content/annual report.pdf", "rb") as f:
+#         with open("/content/drive/MyDrive/annualreport.pdf", "rb") as f:
 #             data = f.read()
-#         st.download_button("DOWNLOAD REPORT", data, file_name="annual report.pdf")
+#         st.download_button("DOWNLOAD REPORT", data, file_name="annualreport.pdf")
 # 
-#         st.image(Image.open("/content/report.jpeg"), width=800)
 # 
 #     elif SELECT == "Contact":
 #         name = "surya teja"
